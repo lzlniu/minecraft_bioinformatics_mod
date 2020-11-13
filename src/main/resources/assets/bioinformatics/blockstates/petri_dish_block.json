@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "bioinformatics:block/petri_dish_block" }
+  }
+}

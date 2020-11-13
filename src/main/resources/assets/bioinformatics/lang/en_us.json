@@ -1,3 +1,5 @@
 {
-  "item.bioinformatics.dna": "DNA"
+  "item.bioinformatics.dna": "DNA",
+  "block.bioinformatics.petri_dish_block": "Petri Dish",
+  "itemGroup.BioinformaticsTab": "Bioinformatics"
 }
