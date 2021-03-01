@@ -1,8 +1,8 @@
 # Bioinformatics mod
-Minecraft 1.16.4; Forge mod.
+Minecraft 1.16.4, Forge mod.
 
 ### New items (DNA and petri dish):
-![image info](./screenshots/mod1.png)
+![image](https://github.com/lzlniu/minecraft_bioinformatics_mod/blob/main/screenshots/mod1.jpg)
 
 ### New block (petri dish block):
-![image info](./screenshots/mod2.png)
+![image](https://github.com/lzlniu/minecraft_bioinformatics_mod/blob/main/screenshots/mod2.jpg)
