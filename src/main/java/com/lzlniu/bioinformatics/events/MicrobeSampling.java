@@ -27,36 +27,64 @@ public class MicrobeSampling {
 
             World ThisWorld = event.getWorld();
             BlockPos ThisBlockPos = event.getPos();
-            boolean IsOpenSky = ThisWorld.canBlockSeeSky(ThisBlockPos.up());
-            boolean IsRaining = ThisWorld.isRaining();
+            Direction BlockDirection = event.getFace(); // get click direction of block
             Biome biome = ThisWorld.getBiome(ThisBlockPos);
-            String BName = biome.getCategory().getName();
+            float CreatureProb = biome.getMobSpawnInfo().getCreatureSpawnProbability();
 
-            int ThisBlockLight = ThisWorld.getLight(ThisBlockPos);
+            BlockPos ThisBlockClickSidePos;
+            if (BlockDirection == Direction.UP) ThisBlockClickSidePos = ThisBlockPos.up();
+            else if (BlockDirection == Direction.DOWN) ThisBlockClickSidePos = ThisBlockPos.down();
+            else if (BlockDirection == Direction.EAST) ThisBlockClickSidePos = ThisBlockPos.east();
+            else if (BlockDirection == Direction.WEST) ThisBlockClickSidePos = ThisBlockPos.west();
+            else if (BlockDirection == Direction.SOUTH) ThisBlockClickSidePos = ThisBlockPos.south();
+            else if (BlockDirection == Direction.NORTH) ThisBlockClickSidePos = ThisBlockPos.north();
+            else ThisBlockClickSidePos = ThisBlockPos;
+
+            int ThisBlockLight = ThisWorld.getLight(ThisBlockPos); // brightness 0-15
+            boolean IsOpenSky = ThisWorld.canBlockSeeSky(ThisBlockClickSidePos); // true or false, click side neighbor block
             if (ThisBlockLight<=0) {
-                Direction BlockDirection = event.getFace(); // get click direction of block
-                if (BlockDirection==Direction.UP) ThisBlockLight = ThisWorld.getLight(ThisBlockPos.up()); // top of this block light
-                else if (BlockDirection==Direction.DOWN) ThisBlockLight = ThisWorld.getLight(ThisBlockPos.down());
-                else if (BlockDirection==Direction.EAST) ThisBlockLight = ThisWorld.getLight(ThisBlockPos.east());
-                else if (BlockDirection==Direction.WEST) ThisBlockLight = ThisWorld.getLight(ThisBlockPos.west());
-                else if (BlockDirection==Direction.SOUTH) ThisBlockLight = ThisWorld.getLight(ThisBlockPos.south());
-                else if (BlockDirection==Direction.NORTH) ThisBlockLight = ThisWorld.getLight(ThisBlockPos.north());
-                else  ThisBlockLight = ThisWorld.getLight(ThisBlockPos);
-            } // if a block is transparent, then the light is itself, otherwise it's decide by the click direction neighboring block
+                ThisBlockLight = ThisWorld.getLight(ThisBlockClickSidePos);
+            } // if a block is transparent (with brightness), then light is itself, otherwise it's decide by the click neighbor block
+
             // float ThisWorldDayTime = ThisWorld.getDayTime();
 
-            float Humidity = biome.getDownfall();
-            if (IsRaining && IsOpenSky) Humidity=1; // during raining or snowing humidity is 1.0
+            BlockPos WaterBase=null; // for under water pressure calculation
+            float Humidity = biome.getDownfall(); // assign humidity (also check its click side has water or not)
+            if (ThisWorld.hasWater(ThisBlockPos)) {
+                WaterBase = ThisBlockPos;
+                Humidity = 2;
+            }
+            else if (ThisWorld.hasWater(ThisBlockClickSidePos)) {
+                WaterBase = ThisBlockClickSidePos;
+                Humidity = 2;
+            }
+            if (IsOpenSky && ThisWorld.isRaining()) {
+                if (biome.getPrecipitation() == Biome.RainType.RAIN) Humidity+=0.2; // during raining humidity add 0.2
+                else if (biome.getPrecipitation() == Biome.RainType.SNOW) Humidity+=0.1; // during snowing humidity add 0.1
+                if (Humidity > 2) Humidity=2; // set humidity always less or equal to 2
+                //else if (Humidity < 0) Humidity=0; // set humidity always greater or equal to 0
+            }
+
+            int Height = ThisBlockPos.getY();
+            float Pressure;
+            if (WaterBase==null) Pressure = 256-Height;
+            else { // block under or the player click side of block close water
+                int WaterDepth;
+                for (WaterDepth = 1; WaterDepth < 256 && ThisWorld.hasWater(WaterBase.up()) ; WaterDepth++) {
+                    WaterBase = WaterBase.up();
+                }
+                Pressure = (256 - WaterBase.getY()) + 192*((float)WaterDepth/10); // above water level air pressure add water pressure
+                // I assume 10m (block) water pressure = 1 sea level air pressure (mc sea level is 64, 256-64=192)
+            }
 
             float Temperature = biome.getTemperature(ThisBlockPos);
             Temperature += (ThisBlockLight-8)*0.01; // minor adjustment on temperature depending on light strength
+            //if (Temperature > 2) Temperature=2; // set temperature always less or equal than 2
 
             if (!player.getEntityWorld().isRemote && !ThisWorld.isRemote) {
                 String msg; // initial an empty string
-                //String pos = ThisBlockPos.getCoordinatesAsString();
-                int pos  = ThisBlockPos.getY();
-                if (IsOpenSky) msg = BName + "\nHumidity: " + Humidity + "\nTemperature: " + Temperature + "\nLight: " + ThisBlockLight + "\nOpen sky.\nY: " + pos;
-                else if (!IsOpenSky) msg = BName + "\nHumidity: " + Humidity + "\nTemperature: " + Temperature + "\nLight: " + ThisBlockLight + "\nIn shadow or underground.\nY: " + pos;
+                if (IsOpenSky) msg = "Humidity: " + Humidity + "\nTemperature: " + Temperature + "\nPressure: " + Pressure + "\nLight: " + ThisBlockLight + "\nCreature: " + CreatureProb + "\nOpen sky.\nHeight: " + Height;
+                else if (!IsOpenSky) msg = "Humidity: " + Humidity + "\nTemperature: " + Temperature + "\nPressure: " + Pressure + "\nLight: " + ThisBlockLight + "\nCreature: " + CreatureProb + "\nIn shadow or underground.\nHeight: " + Height;
                 else msg = "Oh no, strange block!";
                 player.sendMessage(new StringTextComponent(msg), player.getUniqueID());
             }
