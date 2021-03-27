@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 @Mod("bioinformatics")
 public class Bioinformatics {
-    private static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger();
     public static final String MOD_ID = "bioinformatics";
     public Bioinformatics() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
