@@ -2,27 +2,32 @@ package com.lzlniu.bioinformatics.events;
 
 import com.lzlniu.bioinformatics.Bioinformatics;
 import com.lzlniu.bioinformatics.util.RegistryHandler;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
+
+import java.util.List;
 
 @Mod.EventBusSubscriber(modid = Bioinformatics.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class MicrobeSampling {
     @SubscribeEvent
     public static void RightClickWithCottonStick(PlayerInteractEvent.RightClickBlock event) {
-
         PlayerEntity player = event.getPlayer();
         Item PlayerHandItem = player.getHeldItemMainhand().getItem();
 
-        if (PlayerHandItem == RegistryHandler.DNA.get()) {
+        if (PlayerHandItem == RegistryHandler.SWAB.get()) {
             // Bioinformatics.LOGGER.info("Player tried collect microbe!");
 
             World ThisWorld = event.getWorld();
@@ -86,7 +91,10 @@ public class MicrobeSampling {
                 if (IsOpenSky) msg = "Humidity: " + Humidity + "\nTemperature: " + Temperature + "\nPressure: " + Pressure + "\nLight: " + ThisBlockLight + "\nCreature: " + CreatureProb + "\nOpen sky.\nHeight: " + Height;
                 else if (!IsOpenSky) msg = "Humidity: " + Humidity + "\nTemperature: " + Temperature + "\nPressure: " + Pressure + "\nLight: " + ThisBlockLight + "\nCreature: " + CreatureProb + "\nIn shadow or underground.\nHeight: " + Height;
                 else msg = "Oh no, strange block!";
-                player.sendMessage(new StringTextComponent(msg), player.getUniqueID());
+                List<ITextComponent> list = null;
+                list.add(new StringTextComponent(msg));
+                PlayerHandItem.addInformation(new ItemStack(RegistryHandler.SWAB.get()), ThisWorld, list, ITooltipFlag.TooltipFlags.NORMAL);
+                // player.sendMessage(new StringTextComponent(msg), player.getUniqueID());
             }
         }
     }

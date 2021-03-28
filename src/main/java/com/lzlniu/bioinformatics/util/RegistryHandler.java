@@ -21,6 +21,7 @@ public class RegistryHandler {
     }
     //items
     public static final RegistryObject<Item> DNA = ITEMS.register("dna", ItemBase::new);
+    public static final RegistryObject<Item> SWAB = ITEMS.register("swab", ItemBase::new);
 
     //blocks
     public static final RegistryObject<Block> PETRI_DISH_BLOCK = BLOCKS.register("petri_dish_block", PetriDishBlock::new);
