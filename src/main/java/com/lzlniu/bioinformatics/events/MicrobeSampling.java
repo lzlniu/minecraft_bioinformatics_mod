@@ -15,7 +15,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
@@ -94,6 +93,7 @@ public class MicrobeSampling {
                 List<ITextComponent> list = null;
                 list.add(new StringTextComponent(msg));
                 PlayerHandItem.addInformation(new ItemStack(RegistryHandler.SWAB.get()), ThisWorld, list, ITooltipFlag.TooltipFlags.NORMAL);
+                
                 // player.sendMessage(new StringTextComponent(msg), player.getUniqueID());
             }
         }
