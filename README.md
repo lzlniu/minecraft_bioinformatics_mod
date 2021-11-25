@@ -1,4 +1,4 @@
-# Bioinformatics mod
+# Bioinformatics mod [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/lzlniu/minecraft_bioinformatics_mod/blob/master/LICENSE)
 Minecraft 1.16.4, Forge mod.
 
 ### New items:
